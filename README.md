@@ -1,11 +1,11 @@
 # ADF4351-USB-Serial
-USB serial driven ADF4351 signal generator for Physics and Ham Radio.
+USB serial driven ADF4351 signal generator for Physics, Electronics lab test, RF Signal Experimentation and Ham Radio.
 
 ## Recently added or updated 🆕 ✨
 - [Example glide modulation](images/exponential_glides.jpg)[14th July,2023]
 
 ## Introduction
-This project arose from a requirement to run multiple frequency generators in parallel for a quantum physics experiment without resorting to a rack of signal generators. The low cost LTDZ ADF4351-PLL bopard was chosen as a source however the default firmware did not provide the requires USB-serial control, only keypad and OLED manual control. Some hardware mods were required to fix the USB interface and upgarde the microcontroller to one wiith same pin out and larger Flash memory. Extensive sets of modulation functions were written to provide dynamic control of the synthesizer output. 
+This project arose from a requirement to run multiple frequency generators in parallel for a quantum physics experiment without resorting to a rack of signal generators. The low cost LTDZ ADF4351-PLL board was chosen as a source however the default firmware did not provide the requires USB-serial control, only keypad and OLED manual control. Some hardware mods were required to fix the USB interface and upgarde the microcontroller to one wiith same pin out and larger Flash memory. Extensive sets of modulation functions were written to provide dynamic control of the synthesizer output. 
 
 The usb serial interface inmplements a very simple set of text commands which can be used either manually or programatically from a script.
 
