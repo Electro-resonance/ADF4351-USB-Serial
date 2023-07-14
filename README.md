@@ -14,7 +14,7 @@ To make the firmware also useful for HAM radio and amateur radio enthusiasts, a 
 
 
 ## Hardware mods to the LTDZ board
-<img src="./images/STM32_removal.jpg" height ="250">
+<img src="./images/STM32_removal.jpg" height ="250", width=50%>
 
 1. An extra 1.5kohm resistor was required as a pull-up on the D+ USB line to 3.3V. 
 2. A 4 lead pin header is soldered for the ST-Link firmware updates.
