@@ -29,6 +29,7 @@ It is suspected that this firmware could be easily be adapted for use on the dev
 ## Commands 
 The usb serial commands are very simple in that they are each a letter followed by a number or a set of words. The commands are as follows:
 
+```console
 H: ADF4351 STM32F103CB Help->
 A: Set amplitude                     (0-4)
 D: Disable RF
@@ -47,6 +48,7 @@ W: Morse Code words per minute       (5-120 WPM)
 X: Modulation LFO Speed              (1-1024)
 Y: Set sigma-delta amplitude         (-1=stop, or: 0-65535)
 Z: Set random frequency modulation   (0=stop, or: -/+____ Hz)
+```
 
 # Compilation
 The code is compiled with Visual Studio Code with Platform.IO
