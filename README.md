@@ -12,9 +12,11 @@ The usb serial interface inmplements a very simple set of text commands which ca
 To make the firmware also useful for HAM radio and amateur radio enthusiasts, a morse code mode is added to directly key the RF output of the signal generator with text provided over the USB-serial interface.
 
 ## Hardware mods to the LTDZ board
+<img src="./images/STM32_removal.jpg" height ="250">
+
 1. An extra 1.5kohm resistor was required as a pull-up on the D+ USB line to 3.3V. 
 2. A 4 lead pin header is soldered for the ST-Link firmware updates.
-3. The STM32F1038t requires reflow work to swap the stm32f103c6t6 (32 kBytes) with the larger flash memory STM32F103CBT6 chip (128kBytes) 
+3. The STM32F1038t requires reflow work to swap out the stm32f103c6t6 (32 kBytes) with the larger flash memory STM32F103CBT6 chip (128kBytes) 
 
 ## Use on other hardware
 It is suspected that this firmware could be easily be adapted for use on the devices sold as "Spectrum Analyzer USB 35-4400M Signal Source with Tracking Source Module RF Frequency Analysis Tool Support NWT4" as these have the ADF4351 as the output RF signal generator and also incorporate a larger ST32F103 microcontroller with USB interface. Further testing is required. It may be just as simple as modifying the SPI pins.
