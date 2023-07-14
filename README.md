@@ -63,10 +63,13 @@ The compiled firmware is supplied for use with ST-LINK tools
 
 ## References
 
-+ [siggen4351 Signal Generator using ADF4351](https://github.com/dfannin/siggen4351) by David Fannin
++ [siggen4351 Arduino Signal Generator using ADF4351](https://github.com/dfannin/siggen4351) by David Fannin
 + [Big Number Arduino Library](https://github.com/nickgammon/BigNumber) by Nick Gammon
-+ [bitBangedSPI](https://github.com/nickgammon/bitBangedSPI) by Nick Gammon
++ [bitBangedSPI Lbrary](https://github.com/nickgammon/bitBangedSPI) by Nick Gammon
 + [ADF4351 Product Page](https://goo.gl/tkMjw6) Analog Devices
 + [SV1AFN ADF4351 Board](https://www.sv1afn.com/adf4351m.html) by Makis Katsouris, SV1AFN
++ [Schematics of a similar board](https://img.elecbee.com/ic/download/pdf/20190731013337STM32-ADF4351.pdf) Elecbee PCB
++ [STM32 Bluepill Setup](https://github.com/rpakdel/stm32_bluepill_arduino_prep) Reza Pakdel 
+
 
 
