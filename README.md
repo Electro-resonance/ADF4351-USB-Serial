@@ -1,4 +1,5 @@
 # ADF4351-USB-Serial
+<img src="./images/modulations.jpg" height ="250">
 USB serial driven ADF4351 signal generator for Physics, Electronics Lab Test, RF Signal Experimentation and also (CW / HF / Morse Code) Ham Radio.
 
 ## Recently added or updated 🆕 ✨
