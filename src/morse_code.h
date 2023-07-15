@@ -23,4 +23,7 @@ void appendMorseChar(char c, String& morseString);
 String writeMorseString(const String& inputString);
 
 //Parse a morse string of . - and space at a given wpm rate and call the two functions to control morse key operation
-void processMorseString(const String& morseString, void (*RF_enable_Func)(), void (*RF_disable_Func)(), int gap = 20);
+void processMorseString(const String& morseString, void (*RF_enable_Func)(), void (*RF_disable_Func)(), int gap = 20, bool line_end=true);
+
+//Interactive serial text to morse code mode
+void interactiveMorseCode(void (*RF_enable_Func)(), void (*RF_disable_Func)(), int wpm = 20);

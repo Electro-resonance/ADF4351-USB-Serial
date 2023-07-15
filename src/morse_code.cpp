@@ -178,7 +178,8 @@ float calculateDotDuration(int wpm) {
     return (int)(60.0 / (DOT_UNITS * (float)wpm) * 1000.0);
 }
 
-void processMorseString(const String& morseString, void (*RF_enable_Func)(), void (*RF_disable_Func)(), int wpm = 20) {
+
+void processMorseString(const String& morseString, void (*RF_enable_Func)(), void (*RF_disable_Func)(), int wpm = 20, bool line_end=true) {
     int gap=calculateDotDuration(wpm);
     for (size_t i = 0; i < morseString.length(); i++) {
         char c = morseString.charAt(i);
@@ -196,10 +197,42 @@ void processMorseString(const String& morseString, void (*RF_enable_Func)(), voi
         } else if (c == ' ') {
             delay(7 * gap);  // Duration of space
         }
-        
         Serial.print(c);
     }
-    
+    if(line_end==true){
+        Serial.println();
+    }
+}
+
+
+void interactiveMorseCode(void (*RF_enable_Func)(), void (*RF_disable_Func)(), int wpm = 20){
+    bool escapKeyPressed=false;
+    Serial.println("Entered Morse Code mode. Press ESC to exit...");
+    // Loop until escape key is pressed
+    while (!escapKeyPressed) {
+        if (Serial.available()) {
+            char c = Serial.read();
+            if (c == 27) {  // ASCII code for escape key
+                escapKeyPressed=true;
+            } else {
+                String command;
+                // Append character to morseString
+                command += c;
+                // Process morseString
+                String morseString = writeMorseString(command);
+                processMorseString(morseString,RF_enable_Func,RF_disable_Func,wpm,false);
+                // Check if character is newline, carriage return
+                if (c == '\n' || c == '\r') {
+                    Serial.println();  // Print newline
+                }
+            }
+        }
+    }
+    // Exit the loop
+    Serial.println();
+    Serial.println();
+    Serial.println("Escape key pressed. Exiting Morse Code mode...");
+    delay(1000);
     Serial.println();
 }
 

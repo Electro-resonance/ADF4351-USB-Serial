@@ -141,6 +141,22 @@ void processSerialInput()
             deltaAmplitude=-1;
             break;
           }
+          case 'B':
+          {
+            command.remove(0, 1);  // Remove the first character
+            int32_t sleep_time = command.toInt();
+            if(sleep_time<0){
+              sleep_time=0;
+            } else if (sleep_time>120000){
+              sleep_time=120000;
+            }
+            Serial.print("Waiting for: ");
+            Serial.print(sleep_time);
+            Serial.println("ms");
+            delay(sleep_time);
+            Serial.println("Wait completed");
+            break;
+          }
           case 'D':
           {
             vfo.disable();
@@ -194,6 +210,7 @@ void processSerialInput()
           {
             Serial.println("H: ADF4351 STM32F103CB Help->");
             Serial.println("A: Set amplitude                     (0-4)");
+            Serial.println("B: Time delay in milliseconds        (0-120000)");
             Serial.println("D: Disable RF");
             Serial.println("E: Enable RF");
             Serial.println("F: Set frequency                     (35000000 - 4400000000 Hz)");
@@ -202,6 +219,7 @@ void processSerialInput()
             Serial.println("I: Frequency information");
             Serial.println("L: Set linear frequency ramp         (0=stop, or: -/+____ Hz)");
             Serial.println("M: Morse Code                        (string)");
+            Serial.println("Morse: enter morse only mode         (ESC to exit)");
             Serial.println("O: Set triangle frequency modulation (0=stop, or: -/+____ Hz)");
             Serial.println("P: Set phase angle                   (0.0-360.0 deg.)");
             Serial.println("R: Register information");
@@ -243,8 +261,14 @@ void processSerialInput()
           case'M':
           {
             command.remove(0, 1);  // Remove the first character
-            String morseString = writeMorseString(command);
-            processMorseString(morseString,enableRF,disableRF,wpm);
+            if (command.startsWith("ORSE")) {
+              //Interactive Morse Code mode
+              interactiveMorseCode(enableRF,disableRF, wpm);
+            } else {
+              String morseString = writeMorseString(command);
+              //Send only current string as Morse Code
+              processMorseString(morseString,enableRF,disableRF,wpm);
+            }
             break;
           }
           case 'O':

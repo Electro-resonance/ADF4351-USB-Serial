@@ -7,6 +7,7 @@ and (CW / HF / Morse Code) Ham Radio.
 
 ## Recently added or updated 🆕 ✨
 - [Example glide modulation](images/exponential_glides.jpg)[14th July,2023]
+- [Added an interactive text to Morse Code CW RF key mode](src/morse_code.cpp)[15th July,2023]
 
 ## Introduction
 This project arose from a requirement to run multiple frequency generators in parallel for a quantum physics experiment without resorting to a rack of signal generators. The low cost LTDZ ADF4351-PLL board was chosen as a source however, the default firmware did not provide the required USB-serial control, only keypad and OLED manual control. Some hardware mods were required to fix the USB interface and upgrade the microcontroller to one with same pin out and larger Flash memory. Extensive sets of modulation functions were written to provide dynamic control of the synthesizer output. 
@@ -72,7 +73,7 @@ H
 F64000000
 #Enable RF
 E
-#Amplitude +5dB
+#Amplitude +5dBm
 A3
 #Amplitude -4dBm
 A0
