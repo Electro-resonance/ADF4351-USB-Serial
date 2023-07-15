@@ -131,9 +131,10 @@ This project is built upon the great work and the shoulders of others:
 + [Big Number Arduino Library](https://github.com/nickgammon/BigNumber) by Nick Gammon
 + [bitBangedSPI Lbrary](https://github.com/nickgammon/bitBangedSPI) by Nick Gammon
 + [SV1AFN ADF4351 Board](https://www.sv1afn.com/adf4351m.html) by Makis Katsouris, SV1AFN
-+ [STM32 Bluepill Setup](https://github.com/rpakdel/stm32_bluepill_arduino_prep) Reza Pakdel
++ [STM32 Bluepill Setup](https://github.com/rpakdel/stm32_bluepill_arduino_prep) by Reza Pakdel
 + [Schematics of a similar board](https://img.elecbee.com/ic/download/pdf/20190731013337STM32-ADF4351.pdf) Elecbee PCB 
 + [ADF4351 Product Page](https://goo.gl/tkMjw6) Analog Devices
++ [ADF4351 Datasheet](https://www.analog.com/media/en/technical-documentation/data-sheets/ADF4351.pdf)  Analog Devices
 
 
 
