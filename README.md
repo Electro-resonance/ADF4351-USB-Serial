@@ -60,21 +60,81 @@ Y: Set sigma-delta amplitude         (-1=stop, or: 0-65535)
 Z: Set random frequency modulation   (0=stop, or: -/+____ Hz)
 ```
 
+## Example commands
+Ensure to run the signal generator into a 50 ohm test load. The output can be observed with an oscilloscope, a spectrum analyser or an SDR receiver using appropriate selected RF pickup or RF attenuators. 
+
+Here is an example usage of the commands that can be used from the usb serial terminal:
+
+```console
+#Help menu
+H
+#Set frequency
+F64000000
+#Enable RF
+E
+#Amplitude +5dB
+A3
+#Amplitude -4dBm
+A0
+#Enable linear glide
+G1000
+#Switch frequency
+F63000000
+#Output current settings
+I
+#Switch to exponential glide
+J10000
+#Switch frequency
+F63500000
+#Disable glide
+J0
+#Enable sinewave with 100kHz modulation width
+S100000
+#Switch to triangle modulation with 100kHz modulation width
+O100000
+#Reduce modulation depth to 10kHz
+O10000
+#Switch to linear (sawtooth) modulation
+L100000
+#Switch to stochastic modulation
+Z100000
+#Reduce stochastic modulation to 10kHz bandwidth
+Z10000
+#Switch back to 100kHz sinewave modulation
+S100000
+#Increase the modulation LFO frequency
+X10
+#Observe fast LFO modulations
+X256
+X512
+X1024
+X500
+#Key the RF output with a morse sequence
+M Hello test message
+#Change Morse Code speed
+X8
+#Retest morse key
+M Slower test message
+```
+
+
 # Compilation
 The code is compiled with Visual Studio Code with Platform.IO
 
 The compiled firmware is supplied for use with ST-LINK tools
 
 
-## References
+# References and Acknowledgement
+This project is built upon the great work and the shoulders of others:
 
 + [siggen4351 Arduino Signal Generator using ADF4351](https://github.com/dfannin/siggen4351) by David Fannin
 + [Big Number Arduino Library](https://github.com/nickgammon/BigNumber) by Nick Gammon
 + [bitBangedSPI Lbrary](https://github.com/nickgammon/bitBangedSPI) by Nick Gammon
-+ [ADF4351 Product Page](https://goo.gl/tkMjw6) Analog Devices
 + [SV1AFN ADF4351 Board](https://www.sv1afn.com/adf4351m.html) by Makis Katsouris, SV1AFN
-+ [Schematics of a similar board](https://img.elecbee.com/ic/download/pdf/20190731013337STM32-ADF4351.pdf) Elecbee PCB
-+ [STM32 Bluepill Setup](https://github.com/rpakdel/stm32_bluepill_arduino_prep) Reza Pakdel 
++ [STM32 Bluepill Setup](https://github.com/rpakdel/stm32_bluepill_arduino_prep) by Reza Pakdel
++ [Schematics of a similar board](https://img.elecbee.com/ic/download/pdf/20190731013337STM32-ADF4351.pdf) Elecbee PCB 
++ [ADF4351 Product Page](https://goo.gl/tkMjw6) Analog Devices
++ [ADF4351 Datasheet](https://www.analog.com/media/en/technical-documentation/data-sheets/ADF4351.pdf)  Analog Devices
 
 
 
