@@ -15,6 +15,7 @@
 //
 
 #include <Arduino.h>
+#include "brd_ltdz_stm32f103cb.h"
 
 void appendMorseChar(char c, String& morseString) {
     switch (c) {
@@ -197,21 +198,21 @@ void processMorseString(const String& morseString, void (*RF_enable_Func)(), voi
         } else if (c == ' ') {
             delay(7 * gap);  // Duration of space
         }
-        Serial.print(c);
+        Serial_print(c);
     }
     if(line_end==true){
-        Serial.println();
+        Serial_println();
     }
 }
 
 
 void interactiveMorseCode(void (*RF_enable_Func)(), void (*RF_disable_Func)(), int wpm = 20){
     bool escapKeyPressed=false;
-    Serial.println("Entered Morse Code mode. Press ESC to exit...");
+    Serial_println("Entered Morse Code mode. Press ESC to exit...");
     // Loop until escape key is pressed
     while (!escapKeyPressed) {
-        if (Serial.available()) {
-            char c = Serial.read();
+        if (Serial_available()) {
+            char c = readSerialData();
             if (c == 27) {  // ASCII code for escape key
                 escapKeyPressed=true;
             } else {
@@ -223,16 +224,16 @@ void interactiveMorseCode(void (*RF_enable_Func)(), void (*RF_disable_Func)(), i
                 processMorseString(morseString,RF_enable_Func,RF_disable_Func,wpm,false);
                 // Check if character is newline, carriage return
                 if (c == '\n' || c == '\r') {
-                    Serial.println();  // Print newline
+                    Serial_println();  // Print newline
                 }
             }
         }
     }
     // Exit the loop
-    Serial.println();
-    Serial.println();
-    Serial.println("Escape key pressed. Exiting Morse Code mode...");
+    Serial_println();
+    Serial_println();
+    Serial_println("Escape key pressed. Exiting Morse Code mode...");
     delay(1000);
-    Serial.println();
+    Serial_println();
 }
 

@@ -29,6 +29,10 @@
 #include "sine_16bit_2048.h"
 #include "morse_code.h"
 
+#include "usbd_if.c" //Arduino USB detatch
+
+
+
 #define SWVERSION "2.0"
 
 
@@ -44,22 +48,16 @@ int32_t exp_glide=0;
 int32_t glide=0;
 bool lock_enable=false;
 
+
 void setup()
 {
-  //Toggle the USB+ pin
-  //May trigger USB detect from host
-  const byte USB_Pin = PA12;
-  pinMode(USB_Pin, OUTPUT);
-  digitalWrite(USB_Pin, HIGH);
-  delay(50);
-  digitalWrite(USB_Pin, LOW);
-
-  SerialUSB.begin(115200);
-  //SimpleFOCDebug::enable(&SerialUSB);
+  delay(500);
+  setupSerial(115200);
+  USBD_reenumerate(); //Only if USBD_ATTACH_PIN or USBD_DETACH_PIN are defined to rtrigger USB reenumeration
 
   delay(10);
-  SerialUSB.print("Adf4351 demo v") ;
-  SerialUSB.println(SWVERSION) ;
+  Serial_print("Adf4351 demo v") ;
+  Serial_println(SWVERSION) ;
   delay(10); 
 }
 
@@ -80,9 +78,11 @@ void setupdds()
       sets the reference frequency to 10 Mhz
   */
   if ( vfo.setrf(10000000UL) ==  0 )
-    SerialUSB.println("ref freq set to 10 Mhz") ;
-  else
-    SerialUSB.println("ref freq set error") ;
+  {
+    Serial_println("ref freq set to 10 Mhz") ;
+  } else {
+    Serial_println("ref freq set error") ;
+  }
   /*!
     initialize the chip
   */
@@ -113,18 +113,18 @@ void processSerialInput()
 {
   static String command = "";
 
-  while (Serial.available())
+  while (Serial_available())
   {
-    char c = Serial.read();
+    char c = readSerialData();
     // Echo back the received character
-    Serial.print(c);
+    Serial_print(c);
     // Convert the received character to uppercase
     c = toupper(c);
 
     // Check if the received character is a newline or carriage return
     if (c == '\n' || c == '\r')
     {
-      Serial.println();
+      Serial_println();
       // Process the command if it's not empty
       if (command.length() > 0)
       {
@@ -136,8 +136,8 @@ void processSerialInput()
             command.remove(0, 1);  // Remove the first character
             uint16_t pwrlevel = command.toInt();
             uint16_t pwrSet = vfo.setAmplitude(pwrlevel);
-            Serial.print("Amplitude set to: ");
-            Serial.println(pwrSet);
+            Serial_print("Amplitude set to: ");
+            Serial_println(pwrSet);
             deltaAmplitude=-1;
             break;
           }
@@ -150,17 +150,17 @@ void processSerialInput()
             } else if (sleep_time>120000){
               sleep_time=120000;
             }
-            Serial.print("Waiting for: ");
-            Serial.print(sleep_time);
-            Serial.println("ms");
+            Serial_print("Waiting for: ");
+            Serial_print(sleep_time);
+            Serial_println("ms");
             delay(sleep_time);
-            Serial.println("Wait completed");
+            Serial_println("Wait completed");
             break;
           }
           case 'D':
           {
             vfo.disable();
-            Serial.println("Disabled RF");
+            Serial_println("Disabled RF");
             linearRamp=0;
             sineWave=0;
             triangle=0;
@@ -171,7 +171,7 @@ void processSerialInput()
           case 'E':
           {
             vfo.enable();
-            Serial.println("Enabled RF");
+            Serial_println("Enabled RF");
             break;
           }
           case 'F':
@@ -184,8 +184,8 @@ void processSerialInput()
               vfo.optimise_f_only(f, true, true);
               current_freq=f;
             } else {
-              Serial.print("Frequency setpoint set to: ");
-              Serial.println(f); 
+              Serial_print("Frequency setpoint set to: ");
+              Serial_println(f); 
               startpoint_freq=current_freq;
             }
             linearRamp=0;
@@ -201,33 +201,33 @@ void processSerialInput()
             if(glide<0){
               glide=0;
             }
-            Serial.print("Glide set to: ");
-            Serial.println(glide);
+            Serial_print("Glide set to: ");
+            Serial_println(glide);
             exp_glide=0;
             break;
           }
           case 'H':
           {
-            Serial.println("H: ADF4351 STM32F103CB Help->");
-            Serial.println("A: Set amplitude                     (0-4)");
-            Serial.println("B: Time delay in milliseconds        (0-120000)");
-            Serial.println("D: Disable RF");
-            Serial.println("E: Enable RF");
-            Serial.println("F: Set frequency                     (35000000 - 4400000000 Hz)");
-            Serial.println("G: Glide Time                        (0-2000 ms)");
-            Serial.println("J: Exponential Glide Time            (0-2000 ms)");
-            Serial.println("I: Frequency information");
-            Serial.println("L: Set linear frequency ramp         (0=stop, or: -/+____ Hz)");
-            Serial.println("M: Morse Code                        (string)");
-            Serial.println("Morse: enter morse only mode         (ESC to exit)");
-            Serial.println("O: Set triangle frequency modulation (0=stop, or: -/+____ Hz)");
-            Serial.println("P: Set phase angle                   (0.0-360.0 deg.)");
-            Serial.println("R: Register information");
-            Serial.println("S: Set sinewave frequency modulation (0=stop, or: -/+____ Hz)");
-            Serial.println("W: Morse Code words per minute       (5-120 WPM)");
-            Serial.println("X: Modulation LFO Speed              (1-1024)");
-            Serial.println("Y: Set sigma-delta amplitude         (-1=stop, or: 0-65535)");
-            Serial.println("Z: Set random frequency modulation   (0=stop, or: -/+____ Hz)");
+            Serial_println("H: ADF4351 STM32F103CB Help->");
+            Serial_println("A: Set amplitude                     (0-4)");
+            Serial_println("B: Time delay in milliseconds        (0-120000)");
+            Serial_println("D: Disable RF");
+            Serial_println("E: Enable RF");
+            Serial_println("F: Set frequency                     (35000000 - 4400000000 Hz)");
+            Serial_println("G: Glide Time                        (0-2000 ms)");
+            Serial_println("J: Exponential Glide Time            (0-2000 ms)");
+            Serial_println("I: Frequency information");
+            Serial_println("L: Set linear frequency ramp         (0=stop, or: -/+____ Hz)");
+            Serial_println("M: Morse Code                        (string)");
+            Serial_println("Morse: enter morse only mode         (ESC to exit)");
+            Serial_println("O: Set triangle frequency modulation (0=stop, or: -/+____ Hz)");
+            Serial_println("P: Set phase angle                   (0.0-360.0 deg.)");
+            Serial_println("R: Register information");
+            Serial_println("S: Set sinewave frequency modulation (0=stop, or: -/+____ Hz)");
+            Serial_println("W: Morse Code words per minute       (5-120 WPM)");
+            Serial_println("X: Modulation LFO Speed              (1-1024)");
+            Serial_println("Y: Set sigma-delta amplitude         (-1=stop, or: 0-65535)");
+            Serial_println("Z: Set random frequency modulation   (0=stop, or: -/+____ Hz)");
             break;
           }
           case 'I':
@@ -242,8 +242,8 @@ void processSerialInput()
             if(exp_glide<0){
               exp_glide=0;
             }
-            Serial.print("Exponential Glide set to: ");
-            Serial.println(exp_glide);
+            Serial_print("Exponential Glide set to: ");
+            Serial_println(exp_glide);
             glide=0;
             break;
           }
@@ -251,8 +251,8 @@ void processSerialInput()
           {
             command.remove(0, 1);  // Remove the first character
             linearRamp = command.toInt();
-            Serial.print("Linear ramp sweep set to: ");
-            Serial.println(linearRamp);
+            Serial_print("Linear ramp sweep set to: ");
+            Serial_println(linearRamp);
             sineWave=0;
             triangle=0;
             randomMod=0;
@@ -275,8 +275,8 @@ void processSerialInput()
           {
             command.remove(0, 1);  // Remove the first character
             triangle = command.toInt();
-            Serial.print("Triangle sweep set to: ");
-            Serial.println(triangle);
+            Serial_print("Triangle sweep set to: ");
+            Serial_println(triangle);
             sineWave=0;
             linearRamp=0;
             randomMod=0;
@@ -287,8 +287,8 @@ void processSerialInput()
             command.remove(0, 1);  // Remove the first character
             double phaseAngle = command.toFloat();
             double phaseSet=vfo.setPhaseAngle(phaseAngle);
-            Serial.print("Phase angle set to: ");
-            Serial.println(phaseSet);
+            Serial_print("Phase angle set to: ");
+            Serial_println(phaseSet);
             break;
           }
           case 'R':
@@ -300,8 +300,8 @@ void processSerialInput()
           {
             command.remove(0, 1);  // Remove the first character
             sineWave = command.toInt();
-            Serial.print("Sinewave sweep set to: ");
-            Serial.println(sineWave);
+            Serial_print("Sinewave sweep set to: ");
+            Serial_println(sineWave);
             linearRamp=0;
             triangle=0;
             randomMod=0;
@@ -316,9 +316,9 @@ void processSerialInput()
             } else if (wpm>120){
               wpm=120;
             }
-            Serial.print("Morse Code speed set to: ");
-            Serial.print(wpm);
-            Serial.println(" words per minute");
+            Serial_print("Morse Code speed set to: ");
+            Serial_print(wpm);
+            Serial_println(" words per minute");
             break;
           }
           case 'X':
@@ -330,8 +330,8 @@ void processSerialInput()
             } else if (mod_speed>1024){
               mod_speed=1024;
             }
-            Serial.print("Modulation speed set to: ");
-            Serial.println(mod_speed);
+            Serial_print("Modulation speed set to: ");
+            Serial_println(mod_speed);
             break;
           }
           case 'Y':
@@ -340,11 +340,11 @@ void processSerialInput()
             int32_t pwrlevel = command.toInt();
             if(pwrlevel!=-1){
               vfo.setSigmaDeltaAmplitude(pwrlevel);
-              Serial.print("Sigma-delta amplitude set to: ");
-              Serial.println(pwrlevel);
+              Serial_print("Sigma-delta amplitude set to: ");
+              Serial_println(pwrlevel);
             } else {
               vfo.setAmplitude(0);
-              Serial.print("Sigma-delta amplitude: disabled ");
+              Serial_print("Sigma-delta amplitude: disabled ");
             }
             deltaAmplitude=pwrlevel;
             break;
@@ -353,8 +353,8 @@ void processSerialInput()
           {
             command.remove(0, 1);  // Remove the first character
             randomMod = command.toInt();
-            Serial.print("Random modulation set to: ");
-            Serial.println(randomMod);
+            Serial_print("Random modulation set to: ");
+            Serial_println(randomMod);
             linearRamp=0;
             sineWave=0;
             triangle=0;
@@ -362,7 +362,7 @@ void processSerialInput()
           }
           default:
             // Invalid command
-            Serial.println("Invalid command");
+            Serial_println("Invalid command");
             break;
         }
       }
@@ -377,7 +377,7 @@ void processSerialInput()
     }
   }
   // Check if no data is available
-  if (Serial.available() == 0)
+  if (Serial_available() == 0)
   {
     if(deltaAmplitude>=0){
       vfo.setSigmaDeltaAmplitude(deltaAmplitude);
@@ -444,7 +444,7 @@ void processSerialInput()
 void loop()
 {
   delay(10);
-  SerialUSB.println("Adf4351") ;
+  Serial_println("Adf4351") ;
 
   //Setup ADF4351 defaults
   vfo.pwrlevel = 0 ; ///< sets to -4 dBm output
@@ -458,18 +458,25 @@ void loop()
 
   // sets the reference frequency to 10 Mhz
   if ( vfo.setrf(25000000UL) ==  0 )
-    SerialUSB.println("ref freq set to 25 Mhz") ;
-  else
-    SerialUSB.println("ref freq set error") ;
+  {
+    Serial_println("ref freq set to 25 Mhz") ;
+  } else {
+    Serial_println("ref freq set error") ;
+  }
 
   //initialize the chip
   vfo.init() ;
   //enable frequency output
   vfo.enable() ;
 
+  delay(1000); 
+
   keyboard_test(2);
 
   vfo.setf_only(last_f);
+
+  //disable frequency output
+  vfo.disable() ;
 
   while(true){
     processSerialInput();

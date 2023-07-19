@@ -6,6 +6,7 @@ and (CW / HF / Morse Code) Ham Radio.
 <img src="./images/modulations.jpg" width=100%>
 
 ## Recently added or updated 🆕 ✨
+- [Added HW Serial](src/brd_ltdz_stm32f103cb.cpp)[19th July,2023]
 - [Example glide modulation](images/exponential_glides.jpg)[14th July,2023]
 - [Added an interactive text to Morse Code CW RF key mode](src/morse_code.cpp)[15th July,2023]
 
@@ -24,8 +25,12 @@ To make the firmware also useful for HAM radio and amateur radio enthusiasts, a 
 2. A 4 lead pin header is soldered for the ST-Link firmware updates.
 3. The STM32F1038t requires reflow work to swap out the stm32f103c6t6 (32 kBytes) with the larger flash memory STM32F103CBT6 chip (128kBytes) 
 
+## Hardware mods to the LTDZ board for 3.3V RS232
+The RPI and USB3.0 adapters struggle with the STM32 USB, so additional duplication of the terminal and command features were added using Hardware Serial. Fortunately Serial2 is configured to use pins PA3(RX) and  PA2(TX). These correspond to the keypad pins Down=Rx and Select=Tx. This allows easy access to those 3.3V RS232 by soldering a pin to the switch. An FTDI USB-serial 3pin adapter can then be used to connect the ADF4351 signal generator to an RPI without worrying about USB compatability. 
+It is suspected that STM32F103 USB compatability is due either to having a constant pullup on D+ and not a software controlled pullup as per the Bluepill and the MapleMini, or it could be that the 8MHz clock for the micro is not to the required specification for generating the USB clocks? The work around is to use 3 pin serial. 
+
 ## Use on other hardware
-It is suspected that this firmware could be easily be adapted for use on the devices sold as "Spectrum Analyzer USB 35-4400M Signal Source with Tracking Source Module RF Frequency Analysis Tool Support NWT4" as these have the ADF4351 as the output RF signal generator and also incorporate a larger ST32F103 microcontroller with USB interface. Further testing is required. It may be just as simple as modifying the SPI pins.
+It is suspected that this firmware could be easily be adapted for use on the devices sold as "Spectrum Analyzer USB 35-4400M Signal Source with Tracking Source Module RF Frequency Analysis Tool Support NWT4" as these have the ADF4351 as the output RF signal generator and also incorporate a larger ST32F103 microcontroller with USB interface. Further testing is required. It may be just as simple as modifying the SPI pins. The changes to support 3 pin serial should help with this port as the Signal tracking source also uses an FTDI chip rather than relying on USB serial from the STM32.
 
 
 ## Features
