@@ -6,6 +6,7 @@ and (CW / HF / Morse Code) Ham Radio.
 <img src="./images/modulations.jpg" width=100%>
 
 ## Recently added or updated 🆕 ✨
+- [Added script to use with multiple signal generators](src/scripts/net_multiple_serial.sh)[21st July,2023]
 - [Added HW Serial](src/brd_ltdz_stm32f103cb.cpp)[19th July,2023]
 - [Example glide modulation](images/exponential_glides.jpg)[14th July,2023]
 - [Added an interactive text to Morse Code CW RF key mode](src/morse_code.cpp)[15th July,2023]
