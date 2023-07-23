@@ -33,24 +33,36 @@ def read_config():
     frequencies = config['Frequencies']['Frequencies'].replace(' ', '').split(',')
     interval = int(config['SignalGeneratorSetup']['Interval'])  # Get the interval in seconds
     init_commands = config['SignalGeneratorSetup']['InitCmds'].replace('"', '')
-    return ip_address, port, frequencies, interval, init_commands
+    extra_commands = {}
+    for key, value in config['SignalGeneratorSetup'].items():
+        if key.startswith('cmd'):
+            extra_commands[key] = value.replace('"', '')
+    return ip_address, port, frequencies, interval, init_commands, extra_commands
+
 
 def send_command(sock, command):
     sock.sendall(command.encode())
     print("sending command:",command.replace('\n',''))
 
-def send_init(sock,channels,init_commands):
+def send_init(sock,frequencies,init_commands,extra_commands):
     # Send the initial commands for each signal generator
-    print("*** Sending signal generator initialiser ***")
-    for index in range(channels):
-        init_command = init_commands.replace("__", f"{index:02}")
-        lines = init_command.split(",")
+    print("*** Sending sig gen initialiser ***")
+    for index in range(len(frequencies)):
+        lines = init_commands.split(",")
         for line in lines:
-            line_cmd = f"{line}\n"
+            line_cmd = f"{index:02}{line}\n"
             send_command(sock, line_cmd)
+    print("*** Sending extra commands ***")
+    for key, value in extra_commands.items():
+        index = int(key[3:])  # Extract the address from the key (cmd00, cmd01, ...)
+        lines = value.split(",")
+        for line in lines:
+            line_cmd = f"{index:02}{line}\n"
+            send_command(sock, line_cmd)
+    print("*** Completed ***")
 
 def main():
-    ip_address, port, frequencies, interval, init_commands = read_config()
+    ip_address, port, frequencies, interval, init_commands, extra_commands = read_config()
     init_sent_time = 0
 
 
@@ -66,7 +78,7 @@ def main():
                 elapsed_time = current_time - init_sent_time
                 if elapsed_time > interval:
                     #Resend the signal generator initialiser
-                    send_init(sock,len(frequencies),init_commands)
+                    send_init(sock,frequencies,init_commands,extra_commands)
                     init_sent_time = time.time()
 
                 for index in range(len(frequencies)):    
