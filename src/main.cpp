@@ -170,6 +170,7 @@ void processSerialInput()
             sineWave=0;
             triangle=0;
             randomMod=0;
+            randomDither=0;
             deltaAmplitude=-1;
             break;
           }
