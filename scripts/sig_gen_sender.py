@@ -60,44 +60,53 @@ class SignalGeneratorNetworkSender:
             self.prev_frequencies.append(-1)
             self.prev_phases.append(-1)
             self.prev_amplitudes.append(-1)
+    
+    def set_extra_command(self,channel,cmd):
+        self.extra_commands[key] = cmd
 
-    def send_command(self, command):
+    def set_init_command(self,cmds):
+        self.init_commands = cmds
+
+    def send_command(self, command,debug):
         self.sock.sendall(command.encode())
-        print("sending command:", command.replace('\n', ''))
+        if(debug==True):
+            print("sending command:", command.replace('\n', ''))
 
-    def send_init(self):
+    def send_init(self,debug):
         # Send the initial commands for each signal generator
-        print("*** Sending signal generator initialiser ***")
+        if(debug==True):
+            print("*** Sending signal generator initialiser ***")
         for index in range(len(self.frequencies)):
             lines = self.init_commands.split(",")
             for line in lines:
                 line_cmd = f"{index:02}{line}\n"
-                self.send_command(line_cmd)
+                self.send_command(line_cmd,debug)
 
-    def send_extra_commands(self):
+    def send_extra_commands(self,debug):
         # Send the extra commands for each signal generator
-        print("*** Sending extra commands ***")
+        if(debug==True):
+            print("*** Sending extra commands ***")
         for key, value in self.extra_commands.items():
             index = int(key[3:])  # Extract the address from the key (cmd00, cmd01, ...)
             lines = value.split(",")
             for line in lines:
                 line_cmd = f"{index:02}{line}\n"
-                self.send_command(line_cmd)
+                self.send_command(line_cmd,debug)
 
-    def send_freq_phase_amplitudes(self,set_all=True):
+    def send_freq_phase_amplitudes(self,set_all=True,debug=True):
         for index in range(len(self.frequencies)):
             # Set the frequency for each signal generator
             if(set_all or self.frequencies[index]!=self.prev_frequencies[index]):
                 frequency_cmd = f"{index:02}f{self.frequencies[index]}\n"
-                self.send_command(frequency_cmd)
+                self.send_command(frequency_cmd,debug)
                 self.prev_frequencies[index]=self.frequencies[index]
             if(set_all or self.phases[index]!=self.prev_phases[index]):
                 phase_cmd = f"{index:02}p{self.phases[index]}\n"
-                self.send_command(phase_cmd)
+                self.send_command(phase_cmd,debug)
                 self.prev_phases[index]=self.phases[index]
             if(set_all or self.amplitudes[index]!=self.prev_amplitudes[index]):         
                 amplitude_cmd = f"{index:02}a{self.amplitudes[index]}\n"
-                self.send_command(amplitude_cmd)
+                self.send_command(amplitude_cmd,debug)
                 self.prev_amplitudes[index]=self.amplitudes[index]
 
     def set_signal(self,channel,freq,phase,amplitude):
@@ -113,18 +122,19 @@ class SignalGeneratorNetworkSender:
             self.sock.connect((self.ip_address, self.port))
             print(f"Connected to {self.ip_address}:{self.port}")
 
-    def run(self,set_all=True):
+    def run(self,set_all=True,debug=True):
         try:
             self.connect()
             current_time = time.time()
             elapsed_time = current_time - self.init_sent_time
             if elapsed_time > self.interval:
                 # Send the initial commands and extra commands
-                self.send_init()
-                self.send_extra_commands()
-                print("*** Initialised ***")
+                self.send_init(debug)
+                self.send_extra_commands(debug)
+                if(debug==True):
+                    print("*** Initialised ***")
                 self.init_sent_time = current_time
-            self.send_freq_phase_amplitudes(set_all)
+            self.send_freq_phase_amplitudes(set_all,debug)
         except Exception as e:
             print(f"Error: {e}")
             self.sock.close()
@@ -136,7 +146,7 @@ class SignalGeneratorNetworkSender:
 if __name__ == "__main__":
     sender = SignalGeneratorNetworkSender()
     while(True):
-        if(sender.run(set_all=True)==False):
+        if(sender.run(set_all=True,debug=True)==False):
             print("Reconnecting after a delay...")
             time.sleep(2)
         time.sleep(1)
