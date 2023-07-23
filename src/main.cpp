@@ -44,7 +44,9 @@ int32_t linearRamp=0;
 int32_t sineWave=0;
 int32_t triangle=0;
 int32_t randomMod=0;
+int32_t randomDither=0;
 int32_t exp_glide=0;
+int32_t constant_glide=0;
 int32_t glide=0;
 bool lock_enable=false;
 
@@ -100,6 +102,11 @@ uint32_t setpoint_freq=last_f;
 uint32_t startpoint_freq=last_f;  
 uint32_t current_freq=last_f; 
 uint16_t wpm=20;
+double freq_step=1;
+bool calc_freq_step=false;
+bool modulation_enable;
+unsigned long currentTime=micros();
+unsigned long startTime=currentTime;
 
 void enableRF() {
     vfo.enable(); // Code to enable the ADF4351 RF
@@ -112,7 +119,6 @@ void disableRF() {
 void processSerialInput()
 {
   static String command = "";
-
   while (Serial_available())
   {
     char c = readSerialData();
@@ -129,11 +135,11 @@ void processSerialInput()
       if (command.length() > 0)
       {
         char firstChar = command[0];
+        command.remove(0, 1);  // Remove the first character
         switch (firstChar)
         {
           case 'A':
           {
-            command.remove(0, 1);  // Remove the first character
             uint16_t pwrlevel = command.toInt();
             uint16_t pwrSet = vfo.setAmplitude(pwrlevel);
             Serial_print("Amplitude set to: ");
@@ -143,7 +149,6 @@ void processSerialInput()
           }
           case 'B':
           {
-            command.remove(0, 1);  // Remove the first character
             int32_t sleep_time = command.toInt();
             if(sleep_time<0){
               sleep_time=0;
@@ -176,17 +181,19 @@ void processSerialInput()
           }
           case 'F':
           {
-            command.remove(0, 1);  // Remove the first character
             uint32_t f = command.toInt();
             last_f=f;
             setpoint_freq=f;
-            if(glide==0 && exp_glide==0){
+            if(glide==0 && exp_glide==0 && constant_glide==0){
               vfo.optimise_f_only(f, true, true);
               current_freq=f;
+              vfo.lock_freq();
+              lock_enable=true;
             } else {
               Serial_print("Frequency setpoint set to: ");
               Serial_println(f); 
               startpoint_freq=current_freq;
+              calc_freq_step=true;
             }
             linearRamp=0;
             sineWave=0;
@@ -196,7 +203,6 @@ void processSerialInput()
           }
           case 'G':
           {
-            command.remove(0, 1);  // Remove the first character
             glide = command.toInt();
             if(glide<0){
               glide=0;
@@ -204,6 +210,7 @@ void processSerialInput()
             Serial_print("Glide set to: ");
             Serial_println(glide);
             exp_glide=0;
+            constant_glide=0;
             break;
           }
           case 'H':
@@ -215,8 +222,9 @@ void processSerialInput()
             Serial_println("E: Enable RF");
             Serial_println("F: Set frequency                     (35000000 - 4400000000 Hz)");
             Serial_println("G: Glide Time                        (0-2000 ms)");
-            Serial_println("J: Exponential Glide Time            (0-2000 ms)");
             Serial_println("I: Frequency information");
+            Serial_println("J: Exponential Glide Time            (0-2000 ms)");
+            Serial_println("K: Constant Glide Time               (0-2000 ms)");
             Serial_println("L: Set linear frequency ramp         (0=stop, or: -/+____ Hz)");
             Serial_println("M: Morse Code                        (string)");
             Serial_println("Morse: enter morse only mode         (ESC to exit)");
@@ -224,6 +232,7 @@ void processSerialInput()
             Serial_println("P: Set phase angle                   (0.0-360.0 deg.)");
             Serial_println("R: Register information");
             Serial_println("S: Set sinewave frequency modulation (0=stop, or: -/+____ Hz)");
+            Serial_println("V: Set random dither frequency width (0=stop, or: -/+____ Hz)");
             Serial_println("W: Morse Code words per minute       (5-120 WPM)");
             Serial_println("X: Modulation LFO Speed              (1-1024)");
             Serial_println("Y: Set sigma-delta amplitude         (-1=stop, or: 0-65535)");
@@ -233,11 +242,36 @@ void processSerialInput()
           case 'I':
           {
             vfo.freqInfo();
+            Serial_println();
+            Serial_println("Mod options:");
+            Serial_print("G: Linear glide: ");
+            Serial_println(glide);
+            Serial_print("J: Expontential glide: ");
+            Serial_println(exp_glide);
+            Serial_print("K: Constant glide: ");
+            Serial_println(constant_glide);
+            Serial_print("L: Linear ramp: ");
+            Serial_println(linearRamp);
+            Serial_print("S: Sinewave: ");
+            Serial_println(sineWave);
+            Serial_print("T: Triangle: ");
+            Serial_println(triangle);
+            Serial_print("V: Random Dither:");
+            Serial_println(randomDither*2);
+            Serial_print("X: Modulation Speed: ");
+            Serial_println(mod_speed);
+            Serial_print("Y: Sigma delta Amplitude: ");
+            Serial_println(deltaAmplitude);
+            Serial_print("Z: Random Modulation: ");
+            Serial_println(randomMod);
+            Serial_print("Lock Enable: ");
+            Serial_println(lock_enable);
+            Serial_print("Freq step: ");
+            Serial_println(freq_step);
             break;
           }
           case 'J':
           {
-            command.remove(0, 1);  // Remove the first character
             exp_glide = command.toInt();
             if(exp_glide<0){
               exp_glide=0;
@@ -245,11 +279,24 @@ void processSerialInput()
             Serial_print("Exponential Glide set to: ");
             Serial_println(exp_glide);
             glide=0;
+            constant_glide=0;
+            break;
+          }
+          case 'K':
+          {
+            constant_glide = command.toInt();
+            if(constant_glide<0){
+              constant_glide=0;
+            }
+            Serial_print("Constant Glide set to: ");
+            Serial_println(constant_glide);
+            calc_freq_step=true;
+            glide=0;
+            exp_glide=0;
             break;
           }
           case 'L':
           {
-            command.remove(0, 1);  // Remove the first character
             linearRamp = command.toInt();
             Serial_print("Linear ramp sweep set to: ");
             Serial_println(linearRamp);
@@ -260,7 +307,6 @@ void processSerialInput()
           }
           case'M':
           {
-            command.remove(0, 1);  // Remove the first character
             if (command.startsWith("ORSE")) {
               //Interactive Morse Code mode
               interactiveMorseCode(enableRF,disableRF, wpm);
@@ -273,7 +319,6 @@ void processSerialInput()
           }
           case 'O':
           {
-            command.remove(0, 1);  // Remove the first character
             triangle = command.toInt();
             Serial_print("Triangle sweep set to: ");
             Serial_println(triangle);
@@ -284,7 +329,6 @@ void processSerialInput()
           }
           case 'P':
           {
-            command.remove(0, 1);  // Remove the first character
             double phaseAngle = command.toFloat();
             double phaseSet=vfo.setPhaseAngle(phaseAngle);
             Serial_print("Phase angle set to: ");
@@ -298,7 +342,6 @@ void processSerialInput()
           }
           case 'S':
           {
-            command.remove(0, 1);  // Remove the first character
             sineWave = command.toInt();
             Serial_print("Sinewave sweep set to: ");
             Serial_println(sineWave);
@@ -307,9 +350,16 @@ void processSerialInput()
             randomMod=0;
             break;
           }
+          case 'V':
+          {
+            randomDither = command.toInt();
+            Serial_print("Random diter frequency width set to: ");
+            Serial_println(randomDither);
+            randomDither/=2; //Divide by two as amplitude spread equally either side of carrier
+            break;
+          }
           case 'W':
           {
-            command.remove(0, 1);  // Remove the first character
             wpm = command.toInt();
             if(wpm<5){
               wpm=5;
@@ -323,7 +373,6 @@ void processSerialInput()
           }
           case 'X':
           {
-            command.remove(0, 1);  // Remove the first character
             mod_speed = command.toInt();
             if(mod_speed<1){
               mod_speed=1;
@@ -336,7 +385,6 @@ void processSerialInput()
           }
           case 'Y':
           {
-            command.remove(0, 1);  // Remove the first character
             int32_t pwrlevel = command.toInt();
             if(pwrlevel!=-1){
               vfo.setSigmaDeltaAmplitude(pwrlevel);
@@ -351,7 +399,6 @@ void processSerialInput()
           }
           case 'Z':
           {
-            command.remove(0, 1);  // Remove the first character
             randomMod = command.toInt();
             Serial_print("Random modulation set to: ");
             Serial_println(randomMod);
@@ -365,6 +412,7 @@ void processSerialInput()
             Serial_println("Invalid command");
             break;
         }
+        modulation_enable=(linearRamp!=0 | sineWave!=0 | triangle!=0 | randomMod!=0 | glide>0 | exp_glide>0 | constant_glide>0 | randomDither>0);
       }
 
       // Clear the command string for the next command
@@ -382,7 +430,10 @@ void processSerialInput()
     if(deltaAmplitude>=0){
       vfo.setSigmaDeltaAmplitude(deltaAmplitude);
     }
-    if(linearRamp!=0 | sineWave!=0 | triangle!=0 | randomMod!=0 | glide>0 | exp_glide>0){
+    currentTime = micros(); // Get the end time
+    unsigned long elapsedTime = currentTime - startTime; // Calculate the elapsed time
+      
+    if(modulation_enable==true){
       freq_loop+=mod_speed;
       if(freq_loop>=sin2048Size){
         freq_loop=0;
@@ -390,9 +441,11 @@ void processSerialInput()
       uint32_t freq=0;
       if(linearRamp!=0){
         setpoint_freq=last_f+(double)freq_loop/(double)sin2048Size*(double)linearRamp;
+        calc_freq_step=true;
         startpoint_freq=current_freq;
       } else if(sineWave!=0){
         setpoint_freq=last_f+(double)sin2048[freq_loop]/65536.0f*(double)sineWave;
+        calc_freq_step=true;
         startpoint_freq=current_freq;
       } else if(triangle!=0){
         double time_period = (double)triangle;
@@ -406,12 +459,20 @@ void processSerialInput()
         {
           setpoint_freq = last_f + (time_period - time_offset) * 2;
         }
+        calc_freq_step=true;
         startpoint_freq = current_freq;
       } else if(randomMod!=0)
       {
         setpoint_freq=last_f+random(0, randomMod);
+        calc_freq_step=true;
         startpoint_freq=current_freq;
       }
+
+      if( calc_freq_step==true){
+        freq_step = int32_t(fabs((double)setpoint_freq - (double)(current_freq)) / (double)constant_glide);
+        calc_freq_step=false;
+      }
+
       if(exp_glide>0){
         double freq_diff=(double)setpoint_freq-(double)current_freq;
         freq=current_freq+(int32_t)(freq_diff/(double)exp_glide);
@@ -423,8 +484,30 @@ void processSerialInput()
         } else {
           freq=setpoint_freq; //When the setpoint is reached
         }
+      } else if(constant_glide>0){
+        freq=current_freq;
+        if(freq != setpoint_freq){
+          int32_t adjusted_freq_step = freq_step * (double)elapsedTime / 1000000.0; // Adjust for iteration time in secs
+          if(adjusted_freq_step<1){
+            adjusted_freq_step=1;
+          }
+          if (freq < setpoint_freq) {
+            freq += adjusted_freq_step;
+            if (freq > setpoint_freq) {
+                freq = setpoint_freq;
+            }
+          } else {
+            freq -= adjusted_freq_step;
+            if (freq < setpoint_freq) {
+                freq = setpoint_freq;
+            }
+          }
+        }
       } else {
         freq=setpoint_freq; //Default with no glide
+      }
+      if(randomDither!=0){
+        freq+=random(-randomDither, +randomDither);
       }
       if(current_freq!=freq){
         vfo.optimise_f_only(freq);

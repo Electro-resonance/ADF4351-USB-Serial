@@ -6,6 +6,7 @@ and (CW / HF / Morse Code) Ham Radio.
 <img src="./images/modulations.jpg" width=100%>
 
 ## Recently added or updated 🆕 ✨
+- [Added constant time glides](images/constant_time_glide.jpg)[23rd July,2023]
 - [Added script to use with multiple signal generators](scripts/net_multiple_serial.sh)[21st July,2023]
 - [Added HW Serial](src/brd_ltdz_stm32f103cb.cpp)[19th July,2023]
 - [Example glide modulation](images/exponential_glides.jpg)[14th July,2023]
@@ -53,14 +54,16 @@ D: Disable RF
 E: Enable RF
 F: Set frequency                     (35000000 - 4400000000 Hz)
 G: Glide Time                        (0-2000 ms)
-J: Exponential Glide Time            (0-2000 ms)
 I: Frequency information
+J: Exponential Glide Time            (0-2000 ms)
+K: Constant Glide Time               (0-2000 ms)
 L: Set linear frequency ramp         (0=stop, or: -/+____ Hz)
 M: Morse Code                        (string)
 O: Set triangle frequency modulation (0=stop, or: -/+____ Hz)
 P: Set phase angle                   (0.0-360.0 deg.)
 R: Register information
 S: Set sinewave frequency modulation (0=stop, or: -/+____ Hz)
+V: Set random dither frequency width (0=stop, or: -/+____ Hz)
 W: Morse Code words per minute       (5-120 WPM)
 X: Modulation LFO Speed              (1-1024)
 Y: Set sigma-delta amplitude         (-1=stop, or: 0-65535)
