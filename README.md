@@ -6,6 +6,7 @@ and (CW / HF / Morse Code) Ham Radio.
 <img src="./images/modulations.jpg" width=100%>
 
 ## Recently added or updated 🆕 ✨
+- [Instructions to programs the STM32F103CB from an RPi](firmware/README.md)[24th July,2023]
 - [Added constant time glides](images/constant_time_glide.jpg)[23rd July,2023]
 - [Added script to use with multiple signal generators](scripts/net_multiple_serial.sh)[21st July,2023]
 - [Added HW Serial](src/brd_ltdz_stm32f103cb.cpp)[19th July,2023]
