@@ -30,6 +30,11 @@ To make the firmware also useful for HAM radio and amateur radio enthusiasts, a 
 
 ## Hardware mods to the LTDZ board for 3.3V RS232
 The RPI and USB3.0 adapters struggle with the STM32 USB, so additional duplication of the terminal and command features were added using Hardware Serial. Fortunately Serial2 is configured to use pins PA3(RX) and  PA2(TX). These correspond to the keypad pins Down=Rx and Select=Tx. This allows easy access to those 3.3V RS232 by soldering a pin to the switch. An FTDI USB-serial 3pin adapter can then be used to connect the ADF4351 signal generator to an RPI without worrying about USB compatability. 
+
+* RX = Lower pin on the Down button (PA3)
+* GND = Upper pin on the Down Button (GND)
+* TX = Lower pin on the Select button (PA2)
+
 It is suspected that STM32F103 USB compatability is due either to having a constant pullup on D+ and not a software controlled pullup as per the Bluepill and the MapleMini, or it could be that the 8MHz clock for the micro is not to the required specification for generating the USB clocks? The work around is to use 3 pin serial. 
 
 ## Use on other hardware
