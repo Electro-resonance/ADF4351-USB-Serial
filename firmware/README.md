@@ -1,4 +1,4 @@
-# Programming the ADF4351 STM32F103CB from a RPI
+# Programming the ADF4351 STM32F103CB from an RPI
 
 The following instructions allow programming the firmware.elf file to the STMF103CB using an ST-LINK-V2 adapter and a 4-wire link connected to the ADF4351 board with the GND,3.3V, SWDIO and SWCLK lines.
 
@@ -26,7 +26,7 @@ sudo openocd -f adf4351_openocd.cfg -c "program firmware.elf verify reset exit"
 ```
 
 # Terminal output during programming
-The folloing shows the messages seen whilst programming the STMF103CB:
+The following shows the messages seen whilst programming the STMF103CB:
 
 ```console
 cd ~/proj/ADF4351-USB-Serial/firmware
