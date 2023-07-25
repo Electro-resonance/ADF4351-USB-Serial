@@ -150,11 +150,11 @@ class SignalGeneratorNetworkSender:
         freq_summary = [self.format_frequency(float(freq)) for freq in self.frequencies]
         print(", ".join(freq_summary))
 
-        print("Phases (0-360 deg):")
+        print("Phases (0°-360°):")
         phase_summary = [f"{int(phase)}°" for phase in self.phases]
         print(", ".join(phase_summary))
 
-        print("Amplitudes (0-3):")
+        print("Amplitudes:")
         amplitude_summary = [self.format_amplitude(int(amplitude)) for amplitude in self.amplitudes]
         print(", ".join(amplitude_summary))
 
