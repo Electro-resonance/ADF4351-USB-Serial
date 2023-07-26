@@ -35,6 +35,8 @@ The RPI and USB3.0 adapters struggle with the STM32 USB, so additional duplicati
 * GND = Upper pin on the Down Button (GND)
 * TX = Lower pin on the Select button (PA2)
 
+<img src="./images/Serial_Connections.jpg" height ="200"><img src="./images/Serial_Inline_Pins.jpg" height ="200">
+
 It is suspected that STM32F103 USB compatability is due either to having a constant pullup on D+ and not a software controlled pullup as per the Bluepill and the MapleMini, or it could be that the 8MHz clock for the micro is not to the required specification for generating the USB clocks? The work around is to use 3 pin serial. 
 
 To test use screen on RPI as a serial terminal emulator to connect to the ttyUSB serial device. For example to connecte to a device appearing as /dev/ttyUSVB0:
