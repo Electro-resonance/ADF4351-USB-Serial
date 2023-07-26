@@ -3,9 +3,9 @@
 #  sig_gen_sender.py
 #  
 #  Author:  Martin Timms
-#  Date:    25th July 2023.
+#  Date:    26th July 2023.
 #  Contributors:
-#  Version: 1.1
+#  Version: 1.2
 #
 #  Released into the public domain.
 #  
@@ -45,6 +45,9 @@ class SignalGeneratorNetworkSender:
         self.freq_offset=0.0
         self.freq_scaling=1.0
         self.freq_summary=False
+        self.reverse_order=True
+        self.ignore_first=False
+        self.SetAll=False
         self.amplitude_values = ["-4dBm", "-1dBm", "+2dBm", "+5dBm"]
         self.read_config()
 
@@ -66,7 +69,10 @@ class SignalGeneratorNetworkSender:
             'NetworkFrequencyControl':{
                 'Debug': 'True',
                 'FreqOffset': '0.0',
-                'FreqScaling': '1.0'
+                'FreqScaling': '1.0',
+                'ReverseOrder': 'True',
+                'SetAll': 'False',
+                'IgnoreFirst': 'False'
             }
         }
         config = configparser.ConfigParser()
@@ -89,6 +95,11 @@ class SignalGeneratorNetworkSender:
         self.frequencies = config['InitialSignals']['Frequencies'].replace(' ', '').split(',')
         self.phases = config['InitialSignals']['Phases'].replace(' ', '').split(',')
         self.amplitudes = config['InitialSignals']['Amplitudes'].replace(' ', '').split(',')
+        
+        self.frequencies.extend([0] * (16 - len(self.frequencies)))
+        self.phases.extend([0] * (16 - len(self.phases)))
+        self.amplitudes.extend([0] * (16 - len(self.amplitudes)))
+
         self.interval = int(config['SignalGeneratorSetup']['Interval'])  # Get the interval in seconds
         self.init_commands = config['SignalGeneratorSetup']['InitCmds'].replace('"', '')
         for key, value in config['SignalGeneratorSetup'].items():
@@ -102,6 +113,9 @@ class SignalGeneratorNetworkSender:
         self.freq_offset= float(config['NetworkFrequencyControl']['FreqOffset'])
         self.freq_scaling= float(config['NetworkFrequencyControl']['FreqScaling'])
         self.freq_summary = config.getboolean('NetworkFrequencyControl', 'FreqSummary')
+        self.reverse_order = config.getboolean('NetworkFrequencyControl', 'ReverseOrder')
+        self.set_all = config.getboolean('NetworkFrequencyControl', 'SetAll')
+        self.ignore_first = config.getboolean('NetworkFrequencyControl', 'IgnoreFirst')
     
     def set_extra_command(self,channel,cmd):
         self.extra_commands[channel] = cmd
@@ -147,32 +161,47 @@ class SignalGeneratorNetworkSender:
     
     def print_frequency_summary(self):
         print("Frequencies:")
-        freq_summary = [self.format_frequency(float(freq)) for freq in self.frequencies]
+        freq_summary = [self.format_frequency(float(freq)) for freq in self.frequencies if float(freq) > 0]
+        if self.reverse_order:
+            freq_summary = freq_summary[::-1]  # Reverse the order of the frequencies
         print(", ".join(freq_summary))
 
         print("Phases (0°-360°):")
-        phase_summary = [f"{int(phase)}°" for phase in self.phases]
+        phase_summary = [f"{int(self.phases[i])}°" for i in range(len(self.phases)) if float(self.frequencies[i]) > 0]
+        if self.reverse_order:
+            phase_summary = phase_summary[::-1]  # Reverse the order of the phases
         print(", ".join(phase_summary))
 
         print("Amplitudes:")
-        amplitude_summary = [self.format_amplitude(int(amplitude)) for amplitude in self.amplitudes]
+        amplitude_summary = [self.format_amplitude(int(self.amplitudes[i])) for i in range(len(self.amplitudes)) if float(self.frequencies[i]) > 0]
+        if self.reverse_order:
+            amplitude_summary = amplitude_summary[::-1]  # Reverse the order of the amplitudes
         print(", ".join(amplitude_summary))
 
+
     def send_freq_phase_amplitudes(self,set_all=True):
-        for index in range(len(self.frequencies)):
-            # Set the frequency for each signal generator
-            if(set_all or self.frequencies[index]!=self.prev_frequencies[index]):
-                frequency_cmd = f"{index:02}f{self.frequencies[index]}\n"
-                self.send_command(frequency_cmd)
-                self.prev_frequencies[index]=self.frequencies[index]
-            if(set_all or self.phases[index]!=self.prev_phases[index]):
-                phase_cmd = f"{index:02}p{self.phases[index]}\n"
-                self.send_command(phase_cmd)
-                self.prev_phases[index]=self.phases[index]
-            if(set_all or self.amplitudes[index]!=self.prev_amplitudes[index]):         
-                amplitude_cmd = f"{index:02}a{self.amplitudes[index]}\n"
-                self.send_command(amplitude_cmd)
-                self.prev_amplitudes[index]=self.amplitudes[index]
+        for indx in range(len(self.frequencies)):
+            if self.reverse_order:
+                index=len(self.frequencies)-indx-1
+            else:
+                index=indx
+            if(self.ignore_first):
+                index=indx
+                indx=indx-1
+            if(indx>=0 and float(self.frequencies[index])>0):
+                # Set the frequency for each signal generator
+                if(set_all or self.frequencies[index]!=self.prev_frequencies[index]):
+                    frequency_cmd = f"{indx:02}f{self.frequencies[index]}\n"
+                    self.send_command(frequency_cmd)
+                    self.prev_frequencies[index]=self.frequencies[index]
+                if(set_all or self.phases[index]!=self.prev_phases[index]):
+                    phase_cmd = f"{indx:02}p{self.phases[index]}\n"
+                    self.send_command(phase_cmd)
+                    self.prev_phases[index]=self.phases[index]
+                if(set_all or self.amplitudes[index]!=self.prev_amplitudes[index]):         
+                    amplitude_cmd = f"{indx:02}a{self.amplitudes[index]}\n"
+                    self.send_command(amplitude_cmd)
+                    self.prev_amplitudes[index]=self.amplitudes[index]
         if (self.freq_summary==True):
             self.print_frequency_summary()
 
@@ -194,7 +223,7 @@ class SignalGeneratorNetworkSender:
             self.sock.connect((self.ip_address, self.port))
             print(f"Connected to {self.ip_address}:{self.port}")
 
-    def run(self,set_all=True):
+    def run(self):
         try:
             self.connect()
             current_time = time.time()
@@ -206,7 +235,7 @@ class SignalGeneratorNetworkSender:
                 if(self.debug==True):
                     print("*** Initialised ***")
                 self.init_sent_time = current_time
-            self.send_freq_phase_amplitudes(set_all)
+            self.send_freq_phase_amplitudes(self.set_all)
         except Exception as e:
             print(f"Error: {e}")
             self.sock.close()
@@ -218,7 +247,7 @@ class SignalGeneratorNetworkSender:
 if __name__ == "__main__":
     sender = SignalGeneratorNetworkSender()
     while(True):
-        if(sender.run(set_all=True)==False):
+        if(sender.run()==False):
             print("Reconnecting after a delay...")
             time.sleep(2)
         time.sleep(1)

@@ -37,6 +37,15 @@ The RPI and USB3.0 adapters struggle with the STM32 USB, so additional duplicati
 
 It is suspected that STM32F103 USB compatability is due either to having a constant pullup on D+ and not a software controlled pullup as per the Bluepill and the MapleMini, or it could be that the 8MHz clock for the micro is not to the required specification for generating the USB clocks? The work around is to use 3 pin serial. 
 
+To test use screen on RPI as a serial terminal emulator to connect to the ttyUSB serial device. For example to connecte to a device appearing as /dev/ttyUSVB0:
+```console
+sudo apt-get install screen
+ls /dev/ttyUSB*
+screen /dev/ttyUSB0 115200
+h
+```
+To disconnect (witihin screen command), type control-a then shift-k
+
 ## Use on other hardware
 It is suspected that this firmware could be easily be adapted for use on the devices sold as "Spectrum Analyzer USB 35-4400M Signal Source with Tracking Source Module RF Frequency Analysis Tool Support NWT4" as these have the ADF4351 as the output RF signal generator and also incorporate a larger ST32F103 microcontroller with USB interface. Further testing is required. It may be just as simple as modifying the SPI pins. The changes to support 3 pin serial should help with this port as the Signal tracking source also uses an FTDI chip rather than relying on USB serial from the STM32.
 

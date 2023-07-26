@@ -82,11 +82,26 @@ function forwardToSerialPort() {
   fi
 }
 
+# Function to disable all devices on connected serial ports
+function sendExitCommand() {
+  for port in "${serial_ports[@]}"; do
+    echo "Sending disable to $port"
+    echo "a0\n" | socat -t 0 -T 0 -u - "$port",b$BAUD_RATE,raw
+    echo "e\n" | socat -t 0 -T 0 -u - "$port",b$BAUD_RATE,raw
+    echo "d\n" | socat -t 0 -T 0 -u - "$port",b$BAUD_RATE,raw
+  done
+  exit
+}
+
+
 # Print the startup message with the listening port and IP address
 echo "Listening on port $TCP_PORT on IP address $(hostname -I | cut -d' ' -f1)."
 
 # Initial scan for available serial ports at startup
 scanSerialPorts
+
+# Set up exit handler
+trap sendExitCommand SIGINT
 
 # Redirect standard error to standard output and keep running in case of errors
 exec 3>&1
