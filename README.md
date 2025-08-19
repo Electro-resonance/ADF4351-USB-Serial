@@ -52,7 +52,7 @@ To disconnect (witihin screen command), type control-a then shift-k
 It is suspected that this firmware could be easily be adapted for use on the devices sold as "Spectrum Analyzer USB 35-4400M Signal Source with Tracking Source Module RF Frequency Analysis Tool Support NWT4" as these have the ADF4351 as the output RF signal generator and also incorporate a larger ST32F103 microcontroller with USB interface. Further testing is required. It may be just as simple as modifying the SPI pins. The changes to support 3 pin serial should help with this port as the Signal tracking source also uses an FTDI chip rather than relying on USB serial from the STM32. It may be worth looking at porting the firmware to the following which is also sold in a case as "35M-4400MHZ WIN NWT4":
 + [siggen4351 Arduino Signal Generator using ADF4351](https://www.epanorama.net/blog/2019/08/10/cheap-spectrum-analyzer-and-signal-generator/) by Tomi Engdahl
 + [LTDZ 35-4400M](https://www.gotronik.pl/ltdz-35-4400m-analizator-widma-usb-aluminiowa-obudowa-p-7996.html)
-+ [Example firmware which may help porting this firmware])(https://github.com/kalvin2021/ltdz-dsp) by github user kalvin2021
++ [Example firmware which may help porting this firmware](https://github.com/kalvin2021/ltdz-dsp) by github user kalvin2021
 
 
 
@@ -166,6 +166,7 @@ This project is built upon the great work and the shoulders of others:
 + [Schematics of a similar board](https://img.elecbee.com/ic/download/pdf/20190731013337STM32-ADF4351.pdf) Elecbee PCB 
 + [ADF4351 Product Page](https://goo.gl/tkMjw6) Analog Devices
 + [ADF4351 Datasheet](https://www.analog.com/media/en/technical-documentation/data-sheets/ADF4351.pdf)  Analog Devices
+
 
 
 
